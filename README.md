@@ -155,23 +155,23 @@ curl -X POST "http://127.0.0.1:8000/evaluate" -H "Content-Type: application/json
 ```
 Metrics:
 
-Hit@k
-Recall@k
-MRR
+- Hit@k
+- Recall@k
+- MRR
 🧩 Key Insights
-Dense retrieval is fast but may not rank results optimally
-Cross-encoder reranking improves semantic ordering
-Caching reduces repeated query latency to near zero
-Monitoring enables visibility into system behavior
+- Dense retrieval is fast but may not rank results optimally
+- Cross-encoder reranking improves semantic ordering
+- Caching reduces repeated query latency to near zero
+- Monitoring enables visibility into system behavior
 🛠 Tech Stack
-FastAPI
-Python
-SentenceTransformers
-Cross-Encoder (MiniLM)
-In-memory vector store
-Custom evaluation pipeline
+- FastAPI
+- Python
+- SentenceTransformers
+- Cross-Encoder (MiniLM)
+- In-memory vector store
+- Custom evaluation pipeline
 📌 Future Improvements
-Hard negative mining for evaluation dataset
-Persistent vector database (FAISS / Qdrant)
-Distributed retrieval architecture
-Integration with LLM-based answer generation
+- Hard negative mining for evaluation dataset
+- Persistent vector database (FAISS / Qdrant)
+- Distributed retrieval architecture
+- Integration with LLM-based answer generation
