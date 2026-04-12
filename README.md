@@ -99,16 +99,27 @@ Monitoring / Evaluation
 
 ```bash
 uvicorn app.main:app --reload
+```
 2. Clear state
+```bash
 curl -X POST http://127.0.0.1:8000/store/clear
-3. Ingest documents
+```
+4. Ingest documents
+```bash
 curl -X POST "http://127.0.0.1:8000/ingest" -H "Content-Type: application/json" -d "{\"documents\":[{\"doc_id\":\"doc_001\",\"title\":\"Evaluation Principles\",\"text\":\"Evaluation is important in production RAG because it measures whether retrieved evidence is relevant, grounded, and useful for answering user questions. It helps teams verify answer quality instead of relying on intuition.\"},{\"doc_id\":\"doc_002\",\"title\":\"System Quality Notes\",\"text\":\"System quality depends on reliability, latency, and consistent performance over time.\"},{\"doc_id\":\"doc_003\",\"title\":\"Monitoring and Latency\",\"text\":\"Monitoring helps track latency and cache hit rate, but does not directly measure answer correctness.\"}]}"
-4. Query WITHOUT reranking
+```
+6. Query WITHOUT reranking
+```bash
 curl -X POST "http://127.0.0.1:8000/query" -H "Content-Type: application/json" -d "{\"query\":\"Why is evaluation important for answer quality in production systems?\",\"top_k\":3,\"use_reranker\":false,\"debug\":true}"
-5. Query WITH reranking
+```
+8. Query WITH reranking
+```bash
 curl -X POST "http://127.0.0.1:8000/query" -H "Content-Type: application/json" -d "{\"query\":\"Why is evaluation important for answer quality in production systems?\",\"top_k\":3,\"use_reranker\":true,\"debug\":true}"
-6. Cache hit (repeat query)
+```
+10. Cache hit (repeat query)
+```bash
 curl -X POST "http://127.0.0.1:8000/query" -H "Content-Type: application/json" -d "{\"query\":\"Why is evaluation important for answer quality in production systems?\",\"top_k\":3,\"use_reranker\":true,\"debug\":true}"
+```
 🚀 Performance
 
 The system demonstrates the trade-off between fast retrieval and accurate reranking.
@@ -125,8 +136,9 @@ Avg rerank latency: 33.53 ms
 Avg total latency: 45.18 ms
 📊 Monitoring
 Logs
+```bash
 curl "http://127.0.0.1:8000/monitoring/logs?limit=10"
-
+```
 Tracks:
 
 query
@@ -134,10 +146,13 @@ cache hit
 reranker usage
 latency breakdown
 Stats
+```bash
 curl http://127.0.0.1:8000/monitoring/stats
+```
 📈 Evaluation
+```bash
 curl -X POST "http://127.0.0.1:8000/evaluate" -H "Content-Type: application/json" -d "{\"dataset_path\":\"data/eval/retrieval_eval_dataset.jsonl\",\"load_demo_data\":true}"
-
+```
 Metrics:
 
 Hit@k
