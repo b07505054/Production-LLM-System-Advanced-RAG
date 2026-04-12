@@ -1,0 +1,4 @@
+{"query":"Why is evaluation important for production RAG?","gold_chunk_ids":["doc_001_chunk_000"],"top_k":2}
+{"query":"How can teams understand system performance over time?","gold_chunk_ids":["doc_002_chunk_000"],"top_k":2}
+{"query":"Which chunk talks about groundedness and latency?","gold_chunk_ids":["doc_001_chunk_000"],"top_k":2}
+{"query":"Which chunk is about reliability and answer quality?","gold_chunk_ids":["doc_002_chunk_000"],"top_k":2}
