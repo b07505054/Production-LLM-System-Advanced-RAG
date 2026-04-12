@@ -11,7 +11,7 @@ A production-style Retrieval-Augmented Generation (RAG) system with:
 
 ---
 
-## 🧠 Overview
+## Overview
 
 This project demonstrates how to build a **production-oriented retrieval system**, focusing on:
 
@@ -23,7 +23,7 @@ Unlike a simple chatbot, this system emphasizes **traceability, debuggability, a
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 Documents
 ↓
@@ -47,7 +47,7 @@ Monitoring / Evaluation
 
 ---
 
-## 🚀 Features
+## Features
 
 ### Retrieval Pipeline
 - Semantic search using embeddings
@@ -71,7 +71,7 @@ Monitoring / Evaluation
 
 ---
 
-## 🏗 System Design Highlights
+## System Design Highlights
 
 - **Modular retrieval architecture**  
   Decoupled ingestion, retrieval, reranking, caching, evaluation, and monitoring layers enable independent upgrades.
@@ -93,7 +93,7 @@ Monitoring / Evaluation
 
 ---
 
-## 🧪 Demo (Step-by-step)
+## Demo (Step-by-step)
 
 ### 1. Start server
 
@@ -120,7 +120,7 @@ curl -X POST "http://127.0.0.1:8000/query" -H "Content-Type: application/json" -
 ```bash
 curl -X POST "http://127.0.0.1:8000/query" -H "Content-Type: application/json" -d "{\"query\":\"Why is evaluation important for answer quality in production systems?\",\"top_k\":3,\"use_reranker\":true,\"debug\":true}"
 ```
-🚀 Performance
+## Performance
 
 The system demonstrates the trade-off between fast retrieval and accurate reranking.
 
@@ -134,7 +134,7 @@ Cache hit rate: 42.86%
 Avg retrieval latency: 11.54 ms
 Avg rerank latency: 33.53 ms
 Avg total latency: 45.18 ms
-📊 Monitoring
+## Monitoring
 Logs
 ```bash
 curl "http://127.0.0.1:8000/monitoring/logs?limit=10"
@@ -149,28 +149,28 @@ Stats
 ```bash
 curl http://127.0.0.1:8000/monitoring/stats
 ```
-📈 Evaluation
+## Evaluation
 ```bash
 curl -X POST "http://127.0.0.1:8000/evaluate" -H "Content-Type: application/json" -d "{\"dataset_path\":\"data/eval/retrieval_eval_dataset.jsonl\",\"load_demo_data\":true}"
 ```
-Metrics:
+## Metrics:
 
 - Hit@k
 - Recall@k
 - MRR
-🧩 Key Insights
+## Key Insights
 - Dense retrieval is fast but may not rank results optimally
 - Cross-encoder reranking improves semantic ordering
 - Caching reduces repeated query latency to near zero
 - Monitoring enables visibility into system behavior
-🛠 Tech Stack
+## Tech Stack
 - FastAPI
 - Python
 - SentenceTransformers
 - Cross-Encoder (MiniLM)
 - In-memory vector store
 - Custom evaluation pipeline
-📌 Future Improvements
+## Future Improvements
 - Hard negative mining for evaluation dataset
 - Persistent vector database (FAISS / Qdrant)
 - Distributed retrieval architecture
