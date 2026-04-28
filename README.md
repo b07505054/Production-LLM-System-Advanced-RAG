@@ -78,6 +78,8 @@ Monitoring / Evaluation
 
 - **Two-stage retrieval design**  
   Dense embedding retrieval for fast recall, followed by cross-encoder reranking for precision.
+- **Trade-off aware design**
+  Explicitly measures quality vs latency trade-offs between retrieval and reranking stages
 
 - **Latency-aware serving path**  
   Stage-level latency tracking allows analysis of retrieval vs reranking cost. Cache enables early exit for repeated queries.
@@ -120,21 +122,35 @@ curl -X POST "http://127.0.0.1:8000/query" -H "Content-Type: application/json" -
 ```bash
 curl -X POST "http://127.0.0.1:8000/query" -H "Content-Type: application/json" -d "{\"query\":\"Why is evaluation important for answer quality in production systems?\",\"top_k\":3,\"use_reranker\":true,\"debug\":true}"
 ```
-## Performance
+## Retrieval Quality Benchmark
 
-The system demonstrates the trade-off between fast retrieval and accurate reranking.
+Evaluated on a **9-query hard-negative dataset**.
 
-Mode	Retrieval ms	Rerank ms	Total ms	Cache Hit	Notes
-Retrieval only	~21 ms	0 ms	~21 ms	No	Fast semantic retrieval baseline
-Retrieval + reranker	~14 ms	~60 ms	~75 ms	No	Cross-encoder reranking improves ranking quality
-Cached query	0 ms	0 ms	~0 ms	Yes	Instant response from cache
-Monitoring Snapshot
-Total queries: 7
-Cache hit rate: 42.86%
-Avg retrieval latency: 11.54 ms
-Avg rerank latency: 33.53 ms
-Avg total latency: 45.18 ms
-## Monitoring
+| Mode | Hit@k | Recall@k | MRR |
+|------|------|----------|-----|
+| Dense retrieval only | 1.00 | 1.00 | 0.9111 |
+| Dense retrieval + reranker | 1.00 | 1.00 | 0.9444 |
+
+> Cross-encoder reranking improved MRR by **+3.7% relative**, correcting ranking errors where semantically similar but incorrect documents were ranked higher.
+
+##  Performance
+
+### Latency
+
+| Mode | Retrieval ms | Rerank ms | Total ms |
+|------|--------------|-----------|----------|
+| Retrieval-only | ~21.7 ms | 0 ms | ~21.7 ms |
+| With reranker | ~17 ms | ~340 ms | ~358 ms |
+| Cached query | 0 ms | 0 ms | ~0.02 ms |
+
+---
+
+### Monitoring Snapshot
+
+- Cache hit rate: **60%**
+- Avg retrieval latency: **7.8 ms**
+- Avg rerank latency: **68.1 ms**
+- Avg total latency: **75.9 ms**## Monitoring
 Logs
 ```bash
 curl "http://127.0.0.1:8000/monitoring/logs?limit=10"
@@ -159,10 +175,11 @@ curl -X POST "http://127.0.0.1:8000/evaluate" -H "Content-Type: application/json
 - Recall@k
 - MRR
 ## Key Insights
-- Dense retrieval is fast but may not rank results optimally
-- Cross-encoder reranking improves semantic ordering
-- Caching reduces repeated query latency to near zero
-- Monitoring enables visibility into system behavior
+- Dense retrieval is fast but may mis-rank semantically similar results  
+- Cross-encoder reranking improves ranking precision  
+- Reranker contributes **~95% of total latency**  
+- Query caching reduces repeated queries from **~358 ms → ~0.02 ms**
+
 ## Tech Stack
 - FastAPI
 - Python

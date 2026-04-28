@@ -1,4 +1,9 @@
-{"query":"Why is evaluation important for production RAG?","gold_chunk_ids":["doc_001_chunk_000"],"top_k":2}
-{"query":"How can teams understand system performance over time?","gold_chunk_ids":["doc_002_chunk_000"],"top_k":2}
-{"query":"Which chunk talks about groundedness and latency?","gold_chunk_ids":["doc_001_chunk_000"],"top_k":2}
-{"query":"Which chunk is about reliability and answer quality?","gold_chunk_ids":["doc_002_chunk_000"],"top_k":2}
+{"query":"Which document is most directly about verifying that retrieved evidence supports an answer?","gold_chunk_ids":["doc_005_chunk_000"],"top_k":5}
+{"query":"Which document explains why evaluation is needed instead of relying on intuition?","gold_chunk_ids":["doc_001_chunk_000"],"top_k":5}
+{"query":"Which document says monitoring metrics do not directly prove answer correctness?","gold_chunk_ids":["doc_003_chunk_000"],"top_k":5}
+{"query":"Which document is about operational service quality such as latency and uptime?","gold_chunk_ids":["doc_002_chunk_000"],"top_k":5}
+{"query":"Which document discusses user-facing answer quality signals but not evidence support?","gold_chunk_ids":["doc_004_chunk_000"],"top_k":5}
+{"query":"Which document defines grounding as verifying that answers are supported by retrieved evidence?","gold_chunk_ids":["doc_005_chunk_000"],"top_k":8}
+{"query":"Which document explains that relevant evidence does not guarantee correctness?","gold_chunk_ids":["doc_006_chunk_000"],"top_k":8}
+{"query":"Which document distinguishes grounding from relevance?","gold_chunk_ids":["doc_008_chunk_000"],"top_k":8}
+{"query":"Which document states that evaluation does not necessarily verify evidence support?","gold_chunk_ids":["doc_007_chunk_000"],"top_k":8}
