@@ -2,7 +2,7 @@ import time
 import uuid
 
 from fastapi import APIRouter, HTTPException
-
+from app.generation.answer_generator import answer_generator
 from app.schemas.query import (
     QueryRequest,
     QueryResponse,
@@ -19,14 +19,6 @@ from app.schemas.monitoring import QueryLogEntry
 
 
 router = APIRouter(prefix="/query", tags=["query"])
-
-
-def generate_answer(query: str, context_chunks: list[ChunkResult]) -> str:
-    if not context_chunks:
-        return "No relevant information found."
-
-    joined_context = " ".join(chunk.text for chunk in context_chunks[:3])
-    return f"Answer to: '{query}'. Based on retrieved evidence: {joined_context}"
 
 
 @router.post("", response_model=QueryResponse)
@@ -131,9 +123,8 @@ def query_documents(payload: QueryRequest) -> QueryResponse:
             final_chunks = reranked_chunks
 
         generation_start = time.perf_counter()
-        answer = generate_answer(payload.query, final_chunks)
+        answer = answer_generator.generate(payload.query, final_chunks)
         generation_ms = round((time.perf_counter() - generation_start) * 1000, 2)
-
         total_ms = round((time.perf_counter() - total_start) * 1000, 2)
 
         query_cache.set(
