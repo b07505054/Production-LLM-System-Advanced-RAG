@@ -1,25 +1,29 @@
-from sentence_transformers import SentenceTransformer
+from transformers import AutoTokenizer
+from optimum.onnxruntime import ORTModelForFeatureExtraction
+import numpy as np
+
+class ONNXEmbedder:
+    def __init__(self, model_path="model/onnx"):
+        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
+        self.model = ORTModelForFeatureExtraction.from_pretrained(model_path)
+
+    def embed_text(self, text: str):
+        inputs = self.tokenizer(text, return_tensors="pt", truncation=True)
+        outputs = self.model(**inputs)
+        embeddings = outputs.last_hidden_state.mean(dim=1)
+        return embeddings.detach().numpy()[0].tolist()
+
+    def embed_texts(self, texts: list[str]):
+        return [self.embed_text(t) for t in texts]
 
 
-class TextEmbedder:
-    """
-    Wrapper around a sentence-transformers embedding model.
+import os
 
-    Responsibilities:
-    - load the embedding model once
-    - provide embedding methods for single text or batch text
-    """
+backend = os.getenv("EMBEDDER_BACKEND", "onnx_fp32")
 
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2") -> None:
-        self.model = SentenceTransformer(model_name)
+if backend == "onnx_int8":
+    from app.retrieval.embedder_onnx_int8 import ONNXInt8Embedder
+    embedder = ONNXInt8Embedder()
 
-    def embed_text(self, text: str) -> list[float]:
-        vector = self.model.encode(text, normalize_embeddings=True)
-        return vector.tolist()
-
-    def embed_texts(self, texts: list[str]) -> list[list[float]]:
-        vectors = self.model.encode(texts, normalize_embeddings=True)
-        return [vector.tolist() for vector in vectors]
-
-
-embedder = TextEmbedder()
+else:
+    embedder = ONNXEmbedder()

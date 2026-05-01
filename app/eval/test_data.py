@@ -13,49 +13,101 @@ def load_demo_eval_documents() -> None:
     documents = [
         {
             "doc_id": "doc_001",
-            "title": "Evaluation Principles",
-            "text": "Evaluation is important in production RAG because it measures whether retrieved evidence is relevant, grounded, and useful for answering user questions. It helps teams verify answer quality instead of relying on intuition.",
+            "title": "RAG Overview",
+            "text": (
+                "RAG stands for Retrieval-Augmented Generation. A RAG system first retrieves "
+                "relevant documents from a knowledge base, then uses those documents as context "
+                "to generate a grounded answer. This improves factuality because the answer is "
+                "based on retrieved evidence instead of relying only on model memory."
+            ),
         },
         {
             "doc_id": "doc_002",
-            "title": "System Quality Notes",
-            "text": "System quality depends on reliability, latency, uptime, and consistent performance over time. Teams often measure service quality using operational indicators and user-facing outcomes.",
+            "title": "Mobile RAG Goal",
+            "text": (
+                "Mobile RAG adapts retrieval-augmented generation for mobile and edge environments. "
+                "The goal is to support low-latency question answering with limited memory, limited "
+                "compute, and unstable network conditions. A mobile RAG demo should avoid manual "
+                "document ingestion and should load a prepared local corpus automatically."
+            ),
         },
         {
             "doc_id": "doc_003",
-            "title": "Monitoring and Latency",
-            "text": "Monitoring helps teams track latency, cache hit rate, and failures. These metrics are important for production systems, but they do not directly measure whether answers are correct or well grounded.",
+            "title": "Hybrid Retrieval",
+            "text": (
+                "Hybrid retrieval combines keyword-based search, such as BM25, with vector similarity "
+                "search from embeddings. Keyword search is strong for exact terms, while vector search "
+                "captures semantic similarity. Combining both methods can improve recall and make the "
+                "retrieval system more robust."
+            ),
         },
         {
             "doc_id": "doc_004",
-            "title": "Answer Quality Signals",
-            "text": "Answer quality can be affected by response clarity, user satisfaction, formatting, and perceived usefulness. These signals are helpful but may not prove that retrieved evidence actually supports the answer.",
+            "title": "Reranking",
+            "text": (
+                "Reranking improves retrieval quality by reordering candidate chunks after the initial "
+                "retrieval step. A fast retriever first returns a broader set of candidates, and a "
+                "stronger reranker scores them more carefully. This often improves top-ranked evidence "
+                "quality before answer generation."
+            ),
         },
         {
             "doc_id": "doc_005",
-            "title": "Retrieval Grounding",
-            "text": "Grounding means verifying that an answer is supported by the retrieved evidence. In RAG systems, grounding checks whether the selected context actually justifies the generated response.",
+            "title": "Edge Latency",
+            "text": (
+                "Edge RAG systems must measure latency carefully because mobile users expect fast "
+                "responses. Useful latency metrics include retrieval latency, reranking latency, "
+                "generation latency, total response latency, and cache-hit latency. These metrics help "
+                "identify which stage creates the largest bottleneck."
+            ),
         },
         {
             "doc_id": "doc_006",
-            "title": "Evidence Relevance",
-            "text": "Relevant evidence improves answer quality by providing useful context. Systems often retrieve relevant information to enhance responses, but relevance does not guarantee correctness.",
+            "title": "Cache Optimization",
+            "text": (
+                "Caching can reduce repeated query latency in a mobile RAG system. If a user asks a "
+                "similar question more than once, the system can reuse a previous retrieval or answer "
+                "result instead of recomputing the full pipeline. Cache hit rate and cache-hit latency "
+                "are important production metrics."
+            ),
         },
         {
             "doc_id": "doc_007",
-            "title": "Evaluation vs Quality",
-            "text": "Evaluation helps measure answer quality and system performance, but not all evaluation metrics directly verify whether retrieved evidence supports the answer.",
+            "title": "Memory Footprint",
+            "text": (
+                "Mobile and edge deployment require careful memory management. Embedding models, vector "
+                "indexes, cached responses, and retrieved chunks all consume memory. A production-ready "
+                "mobile RAG system should report vector store size, number of chunks, cache size, and "
+                "estimated memory footprint."
+            ),
         },
         {
             "doc_id": "doc_008",
-            "title": "Grounding vs Relevance",
-            "text": "Grounding ensures that answers are supported by retrieved evidence, whereas relevance only indicates that the information is related to the query.",
+            "title": "Offline Retrieval",
+            "text": (
+                "Offline retrieval allows a mobile RAG demo to answer questions without depending on a "
+                "live ingestion API or external database. The system can preload a small local corpus "
+                "during startup and retrieve from an in-memory or persisted local vector store."
+            ),
         },
         {
             "doc_id": "doc_009",
-            "title": "Fake Grounding",
-            "text": "Grounding refers to ensuring that retrieved documents are relevant to the query and improve answer quality.",
-        }
+            "title": "Grounded Answers",
+            "text": (
+                "A grounded RAG answer should be supported by retrieved chunks. The system should return "
+                "citations, retrieved evidence, and debug information so developers can inspect whether "
+                "the answer is actually based on the selected context."
+            ),
+        },
+        {
+            "doc_id": "doc_010",
+            "title": "Mobile Demo Workflow",
+            "text": (
+                "A good mobile RAG demo starts the backend server, automatically loads a prepared demo "
+                "corpus, accepts questions from a mobile client, retrieves relevant chunks, generates a "
+                "grounded answer, and reports latency metrics for each request."
+            ),
+        },
     ]
 
     all_chunks = []

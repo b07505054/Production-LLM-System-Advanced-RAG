@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from app.eval.test_data import load_demo_eval_documents
+from app.retrieval.embedder import embedder
 
 from app.api.routes_query import router as query_router
 from app.api.routes_ingest import router as ingest_router
@@ -13,7 +15,12 @@ app = FastAPI(
     description="Advanced RAG system with retrieval, reranking, evaluation, monitoring, and caching",
 )
 
-
+@app.on_event("startup")
+def startup_load_demo_data():
+    load_demo_eval_documents()
+    embedder.embed_text("warmup")
+    
+    
 @app.get("/health")
 def health_check():
     return {
