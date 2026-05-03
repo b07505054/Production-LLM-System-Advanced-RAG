@@ -1,194 +1,264 @@
-# Production LLM System (Advanced RAG)
-
-A production-style Retrieval-Augmented Generation (RAG) system with:
-
-- Multi-document ingestion
-- Dense vector retrieval
-- Cross-encoder reranking
-- Evaluation pipeline
-- Query caching
-- Monitoring & observability
-
----
+# Mobile RAG Lite: Edge-Oriented RAG System
 
 ## Overview
 
-This project demonstrates how to build a **production-oriented retrieval system**, focusing on:
+This project upgrades a production-style RAG system into a mobile-integrated, edge-oriented AI system.
 
-- Retrieval quality (evaluation metrics)
-- System performance (latency + caching)
-- Observability (monitoring endpoints)
+The goal is to evaluate how a RAG pipeline behaves under constrained-device assumptions, including limited compute, limited memory, mobile network latency, and the need for low-latency retrieval.
 
-Unlike a simple chatbot, this system emphasizes **traceability, debuggability, and measurable performance**.
+The system includes:
 
----
-
-## Architecture
-
-Documents
-↓
-Chunking
-↓
-Embedding
-↓
-Vector Store
-↓
-
-Query
-↓
-Dense Retrieval (Top-K)
-↓
-Cross-Encoder Reranker
-↓
-Answer Generation
-↓
-Monitoring / Evaluation
-
+- FastAPI RAG backend
+- ONNX INT8 embedding inference
+- Query-level cache
+- Optional reranking
+- Retrieval evaluation
+- iOS mobile client
+- Clientserver latency measurement
+- Cold-query vs cache-hit comparison
 
 ---
 
-## Features
+## Target Deployment Scenario
 
-### Retrieval Pipeline
-- Semantic search using embeddings
-- Top-k document retrieval
-- Cross-encoder reranking (second-stage ranking)
+This project simulates deployment for constrained mobile environments, such as:
 
-### Evaluation
-- Hit@k, Recall@k, MRR
-- Retrieval-only vs reranked comparison
-- API-based evaluation endpoint
+- iPhone SE-class devices
+- Budget Android phones
+- CPU-first execution
+- Limited memory and battery
+- Unstable mobile network
+- Need for fast user-facing response
 
-### Performance & Observability
-- Query caching (cache hit / miss)
-- Stage-level latency tracking:
-  - retrieval
-  - reranking
-  - generation
-- Monitoring endpoints:
-  - `/monitoring/logs`
-  - `/monitoring/stats`
+The current implementation is a hybrid mobile-edge architecture:
 
----
+iOS Client
+   ↓
+FastAPI Backend
+   ↓
+ONNX INT8 Embedder
+   ↓
+Vector Retrieval + Cache + Optional Reranker
+   ↓
+Evaluation Metrics
 
-## System Design Highlights
-
-- **Modular retrieval architecture**  
-  Decoupled ingestion, retrieval, reranking, caching, evaluation, and monitoring layers enable independent upgrades.
-
-- **Two-stage retrieval design**  
-  Dense embedding retrieval for fast recall, followed by cross-encoder reranking for precision.
-- **Trade-off aware design**
-  Explicitly measures quality vs latency trade-offs between retrieval and reranking stages
-
-- **Latency-aware serving path**  
-  Stage-level latency tracking allows analysis of retrieval vs reranking cost. Cache enables early exit for repeated queries.
-
-- **Built-in observability**  
-  Monitoring endpoints expose cache hit rate, latency metrics, and query logs for system inspection.
-
-- **Evaluation as a first-class component**  
-  Retrieval performance is measurable through Hit@k, Recall@k, and MRR via API or offline scripts.
-
-- **Debug-friendly API design**  
-  Query responses optionally include retrieved chunks, reranked chunks, and detailed metrics.
+The system is not yet fully on-device. ONNX inference currently runs on the backend. A future upgrade will move the embedding model fully on-device using a bare workflow and ONNX Runtime Mobile.
 
 ---
 
-## Demo (Step-by-step)
+## Key Features
 
-### 1. Start server
+### 1. Mobile RAG Client
 
-```bash
-uvicorn app.main:app --reload
-```
-2. Clear state
-```bash
-curl -X POST http://127.0.0.1:8000/store/clear
-```
-4. Ingest documents
-```bash
-curl -X POST "http://127.0.0.1:8000/ingest" -H "Content-Type: application/json" -d "{\"documents\":[{\"doc_id\":\"doc_001\",\"title\":\"Evaluation Principles\",\"text\":\"Evaluation is important in production RAG because it measures whether retrieved evidence is relevant, grounded, and useful for answering user questions. It helps teams verify answer quality instead of relying on intuition.\"},{\"doc_id\":\"doc_002\",\"title\":\"System Quality Notes\",\"text\":\"System quality depends on reliability, latency, and consistent performance over time.\"},{\"doc_id\":\"doc_003\",\"title\":\"Monitoring and Latency\",\"text\":\"Monitoring helps track latency and cache hit rate, but does not directly measure answer correctness.\"}]}"
-```
-6. Query WITHOUT reranking
-```bash
-curl -X POST "http://127.0.0.1:8000/query" -H "Content-Type: application/json" -d "{\"query\":\"Why is evaluation important for answer quality in production systems?\",\"top_k\":3,\"use_reranker\":false,\"debug\":true}"
-```
-8. Query WITH reranking
-```bash
-curl -X POST "http://127.0.0.1:8000/query" -H "Content-Type: application/json" -d "{\"query\":\"Why is evaluation important for answer quality in production systems?\",\"top_k\":3,\"use_reranker\":true,\"debug\":true}"
-```
-10. Cache hit (repeat query)
-```bash
-curl -X POST "http://127.0.0.1:8000/query" -H "Content-Type: application/json" -d "{\"query\":\"Why is evaluation important for answer quality in production systems?\",\"top_k\":3,\"use_reranker\":true,\"debug\":true}"
-```
-## Retrieval Quality Benchmark
+Built an iOS client using Expo  React Native.
 
-Evaluated on a **9-query hard-negative dataset**.
+The mobile UI supports:
 
-| Mode | Hit@k | Recall@k | MRR |
-|------|------|----------|-----|
-| Dense retrieval only | 1.00 | 1.00 | 0.9111 |
-| Dense retrieval + reranker | 1.00 | 1.00 | 0.9444 |
+- Query input
+- Backend RAG query execution
+- Retrieved result display
+- Client latency measurement
+- Server latency measurement
+- Cache hit  cold query mode display
+- Cache bypass toggle
+- Reranker toggle
+- Evaluation trigger and metric display
 
-> Cross-encoder reranking improved MRR by **+3.7% relative**, correcting ranking errors where semantically similar but incorrect documents were ranked higher.
+### 2. ONNX INT8 Embedding Backend
 
-##  Performance
+The embedding model was optimized from PyTorch into ONNX and then quantized to INT8.
 
-### Latency
+Pipeline:
 
-| Mode | Retrieval ms | Rerank ms | Total ms |
-|------|--------------|-----------|----------|
-| Retrieval-only | ~21.7 ms | 0 ms | ~21.7 ms |
-| With reranker | ~17 ms | ~340 ms | ~358 ms |
-| Cached query | 0 ms | 0 ms | ~0.02 ms |
+SentenceTransformer
+   ↓
+ONNX FP32
+   ↓
+ONNX INT8
+   ↓
+FastAPI Embedder
 
----
+Benchmark result:
 
-### Monitoring Snapshot
+Backend: Cold Query Avg Latency
+ONNX FP32: ~13.14 ms
+ONNX INT8: ~10.90 ms
 
-- Cache hit rate: **60%**
-- Avg retrieval latency: **7.8 ms**
-- Avg rerank latency: **68.1 ms**
-- Avg total latency: **75.9 ms**## Monitoring
-Logs
-```bash
-curl "http://127.0.0.1:8000/monitoring/logs?limit=10"
-```
-Tracks:
+INT8 quantization reduced backend embedding latency by approximately 17%.
 
-query
-cache hit
-reranker usage
-latency breakdown
-Stats
-```bash
-curl http://127.0.0.1:8000/monitoring/stats
-```
-## Evaluation
-```bash
-curl -X POST "http://127.0.0.1:8000/evaluate" -H "Content-Type: application/json" -d "{\"dataset_path\":\"data/eval/retrieval_eval_dataset.jsonl\",\"load_demo_data\":true}"
-```
-## Metrics:
+### 3. Cache-Aware RAG Optimization
 
-- Hit@k
-- Recall@k
+The system exposes both cold-query and cache-hit behavior.
+
+Example result:
+
+Mode: Server Latency
+Cold Query: ~100 ms+
+Cache Hit: ~0.02 ms
+
+Cache hits bypass retrieval and generation, reducing repeated-query cost.
+
+### 4. Retrieval Evaluation
+
+The backend includes an evaluation endpoint for retrieval quality.
+
+Metrics include:
+
+- Hit@K
+- Recall@K
 - MRR
-## Key Insights
-- Dense retrieval is fast but may mis-rank semantically similar results  
-- Cross-encoder reranking improves ranking precision  
-- Reranker contributes **~95% of total latency**  
-- Query caching reduces repeated queries from **~358 ms → ~0.02 ms**
 
-## Tech Stack
-- FastAPI
+The mobile UI can trigger evaluation and display summarized metrics.
+
+Example:
+
+Examples: 9
+Hit@K: 0.4444
+Recall@K: 0.4444
+MRR: 0.1991
+
+---
+
+## Development Strategy
+
+This project was developed using a step-by-step validation approach.
+
+### Step 1: Retrieval Correctness
+
+Before optimizing latency, the retrieval pipeline was validated using Hit@K, Recall@K, and MRR.
+
+### Step 2: Cold-Start Optimization
+
+A cold-start latency issue was identified where the first query took over 20 seconds due to lazy model initialization.
+
+Solution:
+
+- Added embedding model warmup during server startup
+
+Result:
+
+First-query latency reduced from ~21 seconds to normal query latency.
+
+### Step 3: Cache Benchmarking
+
+Implemented two-round benchmarking:
+
+- Round 1: cold query
+- Round 2: cache hit
+
+This verified that repeated queries could bypass retrieval and return near-zero server latency.
+
+### Step 4: ONNX INT8 Optimization
+
+Converted the embedding model to ONNX and applied INT8 quantization to reduce inference cost.
+
+### Step 5: Mobile Integration
+
+Built an iOS mobile client to test real-device latency and query behavior.
+
+### Step 6: Evaluation Integration
+
+Connected the evaluation endpoint to the mobile UI to expose retrieval quality metrics.
+
+---
+
+## Mobile Demo
+
+The iOS demo shows:
+
+- Query execution
+- Retrieved chunks
+- Client latency
+- Server latency
+- Cache hit  cold query mode
+- Cache bypass control
+- Reranker toggle
+- Evaluation metrics
+
+Example flow:
+
+1. Enter query
+2. Run query
+3. View retrieved results
+4. Compare clientserver latency
+5. Repeat query to observe cache hit
+6. Toggle cache bypass for cold-query testing
+7. Run evaluation
+
+---
+
+## Technical Stack
+
+### Backend
+
 - Python
-- SentenceTransformers
-- Cross-Encoder (MiniLM)
-- In-memory vector store
-- Custom evaluation pipeline
-## Future Improvements
-- Hard negative mining for evaluation dataset
-- Persistent vector database (FAISS / Qdrant)
-- Distributed retrieval architecture
-- Integration with LLM-based answer generation
+- FastAPI
+- ONNX Runtime
+- Sentence Transformers
+- INT8 quantization
+- Vector retrieval
+- Query cache
+- Retrieval evaluation
+
+### Mobile
+
+- React Native
+- Expo Dev Client
+- iOS real-device testing
+- Mobile latency instrumentation
+
+---
+
+## Current Limitation
+
+The current system is a hybrid architecture:
+
+Mobile client + optimized backend
+
+ONNX INT8 inference runs on the backend, not directly on the iPhone.
+
+This was a deliberate engineering trade-off because Expo managed workflow has limitations with native ONNX Runtime modules on iOS.
+
+---
+
+## Future Work
+
+Planned upgrades:
+
+- Move ONNX embedding inference fully on-device
+- Use bare React Native  Expo prebuild workflow
+- Add local vector store on iPhone
+- Add memory footprint measurement
+- Add model size comparison
+- Add hardware-aware runtime benchmarking
+- Evaluate latency vs quality trade-offs with reranking enabled
+
+---
+
+## Engineering Lessons
+
+A major challenge was iOS native build instability when attempting to integrate ONNX Runtime directly into Expo managed workflow.
+
+Key lesson:
+
+For mobile native ML systems, build pipeline stability must be validated before adding heavy native dependencies.
+
+The project was reset into a clean iOS baseline and rebuilt incrementally.
+
+This improved debuggability and avoided mixing app logic errors with native build-chain issues.
+
+---
+
+## Resume Summary
+
+Built a mobile-integrated, edge-oriented RAG system with ONNX INT8-optimized embeddings, cache-aware latency benchmarking, optional reranking, retrieval evaluation, and an iOS client for real-device latency measurement.
+
+## Demo
+
+### 🎥 Full Demo Video (Download)
+[Download Demo Video](assets/demo.mp4)
+
+> Demonstrates cold-query vs cache latency, reranking impact, and evaluation metrics on a mobile-integrated RAG system.
+
+### ⚡ Quick Preview
+![Demo](assets/demo.gif)

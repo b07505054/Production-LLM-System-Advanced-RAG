@@ -17,6 +17,74 @@ export default function HomeScreen() {
   const [evalResult, setEvalResult] = useState("");
   const [evalMetrics, setEvalMetrics] = useState<any | null>(null);
 
+  async function runFullDemo() {
+    setStatus("Running full demo...");
+    setResults([]);
+    setCacheHit(null);
+
+    const baseQuery = "What is retrieval augmented generation";
+
+    try {
+      // ---------- Cold Query ----------
+      const startCold = performance.now();
+
+      const resCold = await fetch(QUERY_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: baseQuery + " " + Date.now(), // force cold
+          top_k: 3,
+          use_reranker: false,
+          debug: true,
+        }),
+      });
+
+      const dataCold = await resCold.json();
+      const endCold = performance.now();
+
+      const coldLatency = endCold - startCold;
+
+      // ---------- Cache Query ----------
+      const startCache = performance.now();
+
+      const resCache = await fetch(QUERY_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: baseQuery,
+          top_k: 3,
+          use_reranker: false,
+          debug: true,
+        }),
+      });
+
+      const dataCache = await resCache.json();
+      const endCache = performance.now();
+
+      const cacheLatency = endCache - startCache;
+
+      setLatency(`Cold: ${coldLatency.toFixed(2)} ms | Cache: ${cacheLatency.toFixed(2)} ms`);
+
+      if (dataCache.retrieved_chunks) {
+        const texts = dataCache.retrieved_chunks.map((c: any) => c.text);
+        setResults(texts);
+      }
+
+      setServerLatency(
+        `Cold: ${dataCold.latency_ms?.toFixed(2)} ms | Cache: ${dataCache.latency_ms?.toFixed(2)} ms`
+      );
+
+      setStatus("Full demo completed");
+    } catch (err) {
+      console.error(err);
+      setStatus("Demo failed");
+    }
+  }
+
   async function runQuery() {
     setStatus("Querying backend...");
     setResults([]);
@@ -137,6 +205,9 @@ export default function HomeScreen() {
           color: "white",
         }}
       />
+      <View style={{ marginTop: 16 }}>
+        <Button title="Run Full Demo (Recommended)" onPress={runFullDemo} />
+      </View>
 
       <View style={{ marginTop: 16 }}>
         <Button title="Run Query" onPress={runQuery} />
@@ -169,7 +240,7 @@ export default function HomeScreen() {
       </Text>
 
       <Text style={{ marginTop: 10, color: "white" }}>
-        Server Latency: {serverLatency || "N/A"}
+        Server Latency: {serverLatency}
       </Text>
 
       <Text style={{ marginTop: 10, color: "white" }}>
@@ -183,7 +254,9 @@ export default function HomeScreen() {
       <Text style={{ marginTop: 10, color: "white" }}>
         Reranker: {useReranker ? "Enabled" : "Disabled"}
       </Text>
-
+      <Text style={{ marginTop: 20, color: "white", fontWeight: "bold" }}>
+        Top-K Retrieved Chunks (Similarity Ranked)
+      </Text>
       <View style={{ marginTop: 20 }}>
         <Text style={{ color: "white", fontWeight: "bold", marginBottom: 8 }}>
           Retrieved Results
