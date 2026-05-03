@@ -256,6 +256,7 @@ Built a mobile-integrated, edge-oriented RAG system with ONNX INT8-optimized emb
 ## Demo
 
 ### 🎥 Full Demo Video (Download)
-[Download Demo Video](Mobile_RAG\mobile-rag\assets\demo.mp4)
+[Download Demo Video](Production-LLM-System-Advanced-RAG/mobile-rag
+/assets/)
 
 > Demonstrates cold-query vs cache latency, reranking impact, and evaluation metrics on a mobile-integrated RAG system.
