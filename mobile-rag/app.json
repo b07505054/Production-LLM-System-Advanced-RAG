@@ -7,9 +7,13 @@
     "icon": "./assets/images/icon.png",
     "scheme": "mobilerag",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.chengluntai.mobilerag",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -42,7 +46,12 @@
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3add7cf2-16f7-4763-9161-f29144b680d8"
+      }
     }
   }
 }
